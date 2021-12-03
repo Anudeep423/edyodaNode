@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1> chat app </h1>
+    <div id = "status" >
+
+    </div>
+    <input placeholder="name" id = "name"  />
+    <br> </br>
+    <input placeholder="message" id = "msg"  />
+    <br> </br>
+    <button onclick="sendMessage()" > send message </button>
+    <div id = "message_container" >
+
+    </div>
+    <script     src="http://localhost:8080/socket.io/socket.io.js"   >   </script>
+    <script>
+     const clientSocket =   io();
+
+     var count = 0
+
+     clientSocket.on("status" , (msg) => {
+         count++;
+        document.getElementById("status").innerHTML += `<p> ${msg}  </p>  `
+     } )
+
+     clientSocket.on("disconnection" , (msg) => {
+         count--;
+        document.getElementById("status").innerHTML += `<p> ${msg}   </p>  `
+     }  )
+     
+
+     clientSocket.on("message" , (msg) => {
+         if( msg.name == document.getElementById("name").value  ){
+        document.getElementById("message_container").innerHTML += `<p> you : ${msg.message}   </p>  `
+         }else{
+            document.getElementById("message_container").innerHTML += `<p> ${msg.name} : ${msg.message}   </p>  `
+         }
+        console.log(msg);
+     } )
+
+     function sendMessage(){
+        var user_name = document.getElementById("name").value
+        var user_message = document.getElementById("msg").value
+        clientSocket.emit("message" , { name : user_name , message  : user_message  } );
+     }
+
+    </script>
+</body>
+</html>
