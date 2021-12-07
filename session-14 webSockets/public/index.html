@@ -23,7 +23,7 @@
     <script>
      const clientSocket =   io();
 
-     var count = 0
+     let count = 0
 
      clientSocket.on("status" , (msg) => {
          count++;
@@ -35,15 +35,40 @@
         document.getElementById("status").innerHTML += `<p> ${msg}   </p>  `
      }  )
      
+     let msgId = 0
 
      clientSocket.on("message" , (msg) => {
          if( msg.name == document.getElementById("name").value  ){
-        document.getElementById("message_container").innerHTML += `<p> you : ${msg.message}   </p>  `
+        document.getElementById("message_container").innerHTML += `<p id = "messageContainer${msgId}" >  you : <span id = "message${msgId}" > ${msg.message}  </span> 
+            <input  placeholder = "updated message" id = "updatedMessage${msgId}" />
+            <button onclick = "updateMessage(${msgId} )" > update  </button>
+            <button onclick = "deleteMessage(${msgId})" id = "deleteMessage${msgId}" > delete message  </button>
+            </p>  `
+            msgId++;
          }else{
-            document.getElementById("message_container").innerHTML += `<p> ${msg.name} : ${msg.message}   </p>  `
+            document.getElementById("message_container").innerHTML += `<p id = "messageContainer${msgId}" >  ${msg.name} : <span id = "message${msgId}" > ${msg.message}  </span> 
+            </p>  `
+            msgId++;
          }
         console.log(msg);
+     });
+
+     clientSocket.on("updatedMessage" , (msgId,updatedMessage) => {
+        document.getElementById("message" + msgId).innerText  = updatedMessage
      } )
+
+     clientSocket.on("deleteMessage" , (id) => {
+            document.getElementById("messageContainer"+id).innerText = ``
+     } )
+
+     function updateMessage(id){
+         var updatedMessage = document.getElementById("updatedMessage" + id ).value
+        clientSocket.emit("updatedMessage" , id ,updatedMessage  )
+     }
+
+     function deleteMessage(id){
+         clientSocket.emit("deleteMessage" , id  )
+     }
 
      function sendMessage(){
         var user_name = document.getElementById("name").value
